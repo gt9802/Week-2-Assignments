@@ -46,4 +46,68 @@ const app = express();
 
 app.use(bodyParser.json());
 
+const port = 3001;
+
+var todoList = []
+
+app.get('/todos',(req,res)=>{
+  res.json(todoList);
+});
+
+
+app.get('/todos/:id',(req,res)=>{
+  const todo = todoList.find(function(t){
+    return t.id === parseInt(req.params.id);
+  });
+  if(todo){
+    res.status(200).json(todo);
+  }else{
+    res.status(404).send();
+  }
+});
+
+
+app.post('/todos', (req,res)=>{
+  var todo = req.body
+  todo.id = Math.floor(Math.random() * 1000000);
+  todo.completed = "false"
+  todoList.push(todo)
+  res.status(201).json(todo)
+})
+app.put('/todos/:id', (req,res)=>{
+  var todo = todoList.find(t => t.id === parseInt(req.params.id))
+
+  if(!todo){
+    return res.status(404).send(" Todo Not Found");
+  } 
+  
+  todo.title = req.body.title || todo.title
+  todo.description = req.body.description || todo.description
+  todo.completed = req.body.completed || todo.completed
+  res.status(200).json(todo)
+})
+
+
+app.delete('/todos/:id',(req,res)=>{
+  var todo = todoList.find(function(t){
+    return t.id === parseInt(req.params.id)
+  });
+  if(!todo){
+    res.status(404).send();
+  }
+  todoList.pop(todo)
+  res.status(200).send();
+
+});
+
+
+app.use((req,res,next)=>{
+  res.status(404).send();
+});
+
+
+app.listen(port, function(){
+  console.log("server listening on port "+ port)
+})
+
 module.exports = app;
